@@ -41,6 +41,7 @@ def add_posts():
     POSTS.append(new_post)
     return jsonify(new_post), 201
 
+
 def find_post_by_id(id):
     for post in POSTS:
         if post['id'] == id:
@@ -59,8 +60,50 @@ def delete_post(id):
     return jsonify(message), 200
 
 
+@app.route("/api/posts/<int:id>", methods=['PUT'])
+def update_post(id):
+    post = find_post_by_id(id)
+    error_message = {"error": f"Post with id {id} not found."}
+    if post is None:
+        return jsonify(error_message), 404
+    new_data = request.get_json()
+    if not validate_book_data(new_data):
+        if 'title' in new_data:
+            post["title"] = new_data["title"]
+            return jsonify(post)
+        elif 'content' in new_data:
+            post["content"] = new_data["content"]
+            return jsonify(post)
+        else:
+            return jsonify({"error": "No data provided."}), 400
+    post.update(new_data)
+    return jsonify(post)
 
 
+@app.route("/api/posts/search", methods=["GET"])
+def query_search():
+    title = request.args.get('title')
+    content = request.args.get('content')
+    relevant_posts = []
+    if title is not None:
+        for post in POSTS:
+            if title.lower() in post['title'].lower():
+                relevant_posts.append(post)
+    elif content is not None:
+        for post in POSTS:
+            if content.lower() in post['content'].lower():
+                relevant_posts.append(post)
+    return jsonify(relevant_posts)
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({"error": "Not Found"}), 404
+
+
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    return jsonify({"error": "Method Not Allowed"}), 405
 
 
 if __name__ == '__main__':
