@@ -41,6 +41,25 @@ def add_posts():
     POSTS.append(new_post)
     return jsonify(new_post), 201
 
+def find_post_by_id(id):
+    for post in POSTS:
+        if post['id'] == id:
+            return post
+    return None
+
+
+@app.route('/api/posts/<int:id>', methods=['DELETE'])
+def delete_post(id):
+    post = find_post_by_id(id)
+    error_message = {"error": f"Post with id {id} not found."}
+    if post is None:
+        return jsonify(error_message), 404
+    POSTS.remove(post)
+    message = {"message": f"Post with id {id} has been deleted successfully."}
+    return jsonify(message), 200
+
+
+
 
 
 
