@@ -19,7 +19,17 @@ def validate_book_data(data):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    return jsonify(POSTS)
+    sort = request.args.get('sort')
+    direction = request.args.get('direction')
+    if sort is None or direction is None:
+        return jsonify(POSTS)
+    elif sort not in ["title", "content"] or direction not in ["asc", "desc"]:
+        return jsonify({"error": "Wrong params provided."}), 400
+    sorted_posts = sorted(POSTS, key=lambda post: post[sort])
+    if direction == "asc":
+        return jsonify(sorted_posts)
+    elif direction == "desc":
+        return jsonify(sorted_posts[::-1])
 
 
 @app.route('/api/posts', methods=['POST'])
