@@ -3,7 +3,7 @@ from flask_cors import CORS
 from random import randint
 
 app = Flask(__name__)
-CORS(app)  # This will enable CORS for all routes
+CORS(app)
 
 POSTS = [
     {"id": 1, "title": "First post", "content": "This is the first post."},
@@ -12,6 +12,7 @@ POSTS = [
 
 
 def validate_book_data(data):
+    """checks if "title" and "content" are in data"""
     if "title" not in data or "content" not in data:
         return False
     return True
@@ -19,6 +20,7 @@ def validate_book_data(data):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
+    """handles get request of endpoint '/api/posts' """
     sort = request.args.get('sort')
     direction = request.args.get('direction')
     if sort is None or direction is None:
@@ -34,6 +36,7 @@ def get_posts():
 
 @app.route('/api/posts', methods=['POST'])
 def add_posts():
+    """handles post request of endpoint '/api/posts' """
     data = request.get_json()
     if not validate_book_data(data):
         return jsonify({"error": "Invalid book data"}), 400
@@ -53,6 +56,7 @@ def add_posts():
 
 
 def find_post_by_id(id):
+    """checks if given "ID" number is in database"""
     for post in POSTS:
         if post['id'] == id:
             return post
@@ -61,6 +65,7 @@ def find_post_by_id(id):
 
 @app.route('/api/posts/<int:id>', methods=['DELETE'])
 def delete_post(id):
+    """handles delete request of endpoint '/api/posts/<int:id>' """
     post = find_post_by_id(id)
     error_message = {"error": f"Post with id {id} not found."}
     if post is None:
@@ -72,6 +77,7 @@ def delete_post(id):
 
 @app.route("/api/posts/<int:id>", methods=['PUT'])
 def update_post(id):
+    """handles put request of endpoint '/api/posts/<int:id>' """
     post = find_post_by_id(id)
     error_message = {"error": f"Post with id {id} not found."}
     if post is None:
@@ -92,6 +98,7 @@ def update_post(id):
 
 @app.route("/api/posts/search", methods=["GET"])
 def query_search():
+    """handles get request of endpoint '/api/posts/search' """
     title = request.args.get('title')
     content = request.args.get('content')
     relevant_posts = []
@@ -108,11 +115,13 @@ def query_search():
 
 @app.errorhandler(404)
 def not_found_error(error):
+    """returns error message 404"""
     return jsonify({"error": "Not Found"}), 404
 
 
 @app.errorhandler(405)
 def method_not_allowed_error(error):
+    """returns error message 405"""
     return jsonify({"error": "Method Not Allowed"}), 405
 
 
